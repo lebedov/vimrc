@@ -122,7 +122,7 @@ au FileType latex,tex,md,markdown,rst,text setlocal spell
 let g:vim_markdown_new_list_item_indent = 4
 
 " Set color scheme:
-" colorscheme lev
+colorscheme lev
 
 " Always keep status line visible:
 set laststatus=2
