@@ -302,5 +302,5 @@ autocmd BufNewFile,BufRead *.rstw set filetype=pyrstnoweb
 " Commands for backing up and restoring contents of ~/.vim/plugged/ so that
 " they can be saved in a git repo and immediately installed without checking
 " them out individually:
-command BackupPlugins !tar -C ~/.vim -zcvf ~/.vim/plugged.tar.gz plugged
-command RestorePlugins !tar -C ~/.vim -zxf ~/.vim/plugged.tar.gz
+command! BackupPlugins !tar -C ~/.vim -zcvf ~/.vim/plugged.tar.gz plugged
+command! RestorePlugins !tar -C ~/.vim -zxf ~/.vim/plugged.tar.gz
