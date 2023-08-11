@@ -10,17 +10,21 @@ endif
 
 " Install vim-plug if it isn't present:
 let data_dir = '~/.vim'
-if empty(glob(data_dir . '/autoload/plug.vim'))
-    silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+let autoload_dir = data_dir . '/autoload'
+if empty(glob(autoload_dir . '/plug.vim'))
+    silent execute '!curl -fLo '.autoload_dir.'/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
     autocmd VimEnter * PlugUpdate --sync | source $MYVIMRC
 endif
 
 " Initialize vim-plug:
-call plug#begin('~/.vim/plugged')
+let plugged_dir = data_dir . '/plugged'
+call plug#begin(plugged_dir)
 
 " Let vim-plug manage vim-plug; update local copy of plug.vim from clone of
 " repo:
-Plug 'junegunn/vim-plug', {'do': 'test ~/.vim/plugged/vim-plug/plug.vim -nt ~/.vim/autoload/plug.vim && cp -p ~/.vim/plugged/vim-plug/plug.vim ~/.vim/autoload/plug.vim'}
+Plug 'junegunn/vim-plug', {'do': 
+    \ 'test '.plugged_dir.'/vim-plug/plug.vim -nt '.
+    \ autoload_dir.'/plug.vim && cp -p '.plugged_dir.'/vim-plug/plug.vim '.autoload_dir.'/plug.vim'}
 
 " Other plugins managed by vim-plug:
 " ale requires vim8
@@ -55,6 +59,11 @@ Plug 'inkarkat/vim-AdvancedSorters'
 Plug 'skywind3000/asyncrun.vim'
 Plug 'chrisbra/csv.vim'
 Plug 'lebedov/mdnav'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'SidOfc/mkdx'
+Plug 'sunaku/vim-dasht'
+" Plug 'godlygeek/tabular'
+" Plug 'preservim/vim-markdown'
 " Plug 'pyarmak/vim-pandoc-live-preview'
 " Plug 'roblillack/vim-bufferlist'
 " Plug 'Shougo/vimproc.vim'
@@ -119,7 +128,11 @@ set encoding=utf-8
 au FileType latex,tex,md,markdown,rst,text setlocal spell
 
 " Always indent list items by 4 spaces in markdown mode:
-let g:vim_markdown_new_list_item_indent = 4
+" let g:vim_markdown_new_list_item_indent = 4
+
+let g:vim_markdown_folding_disabled = 1
+let g:vim_markdown_auto_insert_bullets = 0
+let g:vim_markdown_new_list_item_indent = 0
 
 " Set color scheme:
 colorscheme lev
@@ -131,17 +144,12 @@ let python_highlight_all=1
 
 set ts=4 sw=4 et
 
-" Python-specific editor configuration:
-au FileType python setlocal tabstop=4 expandtab shiftwidth=4 softtabstop=4
-
-" C++-specific editor configuration:
-au FileType cpp setlocal tabstop=4 expandtab shiftwidth=4 softtabstop=4
-
-" Pandoc-specific editor configuration:
-au FileType pandoc setlocal tabstop=4 expandtab shiftwidth=4 softtabstop=4 textwidth=80
-
-" JSON-specific editor configuration:
-au FileType json setlocal tabstop=4 expandtab shiftwidth=4 softtabstop=4
+" File type-specific editor configuration:
+au FileType python setlocal tabstop=4 expandtab shiftwidth=4 softtabstop=0 smarttab
+au FileType cpp setlocal tabstop=4 expandtab shiftwidth=4 softtabstop=0 smarttab
+au FileType pandoc setlocal tabstop=4 expandtab shiftwidth=4 softtabstop=0 smarttab textwidth=80
+au FileType markdown setlocal tabstop=4 expandtab shiftwidth=4 softtabstop=0 smarttab textwidth=80
+au FileType json setlocal tabstop=4 expandtab shiftwidth=4 softtabstop=0 smarttab
 
 " Disable pandoc folding module because it can be slow:
 let g:pandoc#modules#disabled = ["folding"]
@@ -236,7 +244,8 @@ let g:NERDTreePatternMatchHighlightFullName = 1
 " Set font used by gvim:
 if has('gui_running')
     if has('gui_macvim')
-        set guifont=InconsolataNerdFontCompleteM-Medium:h18
+"        set guifont=InconsolataNerdFontCompleteM-Medium:h18
+        set guifont=InconsolataNF-Regular:h18
     else
         set guifont=Inconsolata\ Nerd\ Font\ Regular\ Medium\ 18
     endif
@@ -304,3 +313,31 @@ autocmd BufNewFile,BufRead *.rstw set filetype=pyrstnoweb
 " them out individually:
 command! BackupPlugins !tar -C ~/.vim -zcvf ~/.vim/plugged.tar.gz plugged
 command! RestorePlugins !tar -C ~/.vim -zxf ~/.vim/plugged.tar.gz
+
+" Shortcut to jump to definition with Coc:
+nmap <silent> gd <Plug>(coc-definition)
+
+" Disable Coc completion suggestions for several file types:
+autocmd FileType markdown let b:coc_suggest_disable = 1
+autocmd FileType python let b:coc_suggest_disable = 1
+
+nmap <leader>sp :call <SID>SynStack()<CR>
+function! <SID>SynStack()
+  if !exists("*synstack")
+    return
+  endif
+  echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
+endfunc
+
+" Dasht search keys:
+" search related docsets
+nnoremap <Leader>k :Dasht<Space>
+
+" search ALL the docsets
+nnoremap <Leader><Leader>k :Dasht!<Space>
+
+" search related docsets
+nnoremap <silent> <Leader>K :call Dasht(dasht#cursor_search_terms())<Return>
+
+" search ALL the docsets
+nnoremap <silent> <Leader><Leader>K :call Dasht(dasht#cursor_search_terms(), '!')<Return>
