@@ -9,7 +9,11 @@ if isdirectory('/usr/local/opt/fzf')
 endif
 
 " Install vim-plug if it isn't present:
-let data_dir = '~/.vim'
+if has('nvim')
+    let data_dir = '~/.local/share/nvim/site'
+else
+    let data_dir = '~/.vim'
+endif
 let autoload_dir = data_dir . '/autoload'
 if empty(glob(autoload_dir . '/plug.vim'))
     silent execute '!curl -fLo '.autoload_dir.'/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
@@ -31,7 +35,9 @@ Plug 'junegunn/vim-plug', {'do':
 " if v:version >= 800
 "    Plug 'w0rp/ale'
 " endif
-Plug 'andrep/vimacs'
+if !has('nvim')
+    Plug 'andrep/vimacs'
+endif
 Plug 'hdima/python-syntax', {'for': 'python'}
 Plug 'vim-syntastic/syntastic'
 Plug 'luochen1990/rainbow'
@@ -53,7 +59,7 @@ Plug 'christoomey/vim-titlecase'
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
-Plug 'jalvesaq/Nvim-R', {'branch': 'stable'}
+Plug 'jalvesaq/Nvim-R'
 Plug 'inkarkat/vim-ingo-library'
 Plug 'inkarkat/vim-AdvancedSorters'
 Plug 'skywind3000/asyncrun.vim'
@@ -62,6 +68,7 @@ Plug 'lebedov/mdnav'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'SidOfc/mkdx'
 Plug 'sunaku/vim-dasht'
+Plug 'lepture/vim-jinja'
 " Plug 'godlygeek/tabular'
 " Plug 'preservim/vim-markdown'
 " Plug 'pyarmak/vim-pandoc-live-preview'
@@ -116,10 +123,7 @@ set wrap
 set textwidth=80
 
 " Set formatting options:
-au FileType text,rst,tex set fo=aw
-
-" Number of colors:
-set t_Co=256
+au FileType text,rst,md,tex set fo=aw
 
 " Default file encoding:
 set encoding=utf-8
