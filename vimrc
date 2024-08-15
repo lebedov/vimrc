@@ -1,13 +1,3 @@
-""" The following lines are required by vim-plug: """
-
-set nocompatible 
-filetype off
-
-" Make fzf available on MacOS:
-if isdirectory('/usr/local/opt/fzf')
-    set rtp+=/usr/local/opt/fzf
-endif
-
 " Install vim-plug if it isn't present:
 if has('nvim')
     let data_dir = '~/.local/share/nvim/site'
@@ -35,9 +25,6 @@ Plug 'junegunn/vim-plug', {'do':
 " if v:version >= 800
 "    Plug 'w0rp/ale'
 " endif
-if !has('nvim')
-    Plug 'andrep/vimacs'
-endif
 Plug 'hdima/python-syntax', {'for': 'python'}
 Plug 'vim-syntastic/syntastic'
 Plug 'luochen1990/rainbow'
@@ -54,6 +41,7 @@ Plug 'itchyny/calendar.vim'
 Plug 'vim-pandoc/vim-pandoc'
 Plug 'vim-pandoc/vim-pandoc-syntax'
 Plug 'mileszs/ack.vim'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'christoomey/vim-titlecase'
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
@@ -68,7 +56,15 @@ Plug 'lebedov/mdnav'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'SidOfc/mkdx'
 Plug 'sunaku/vim-dasht'
+Plug 'dkarter/bullets.vim'
+Plug 'prettier/vim-prettier'
+Plug 'MattesGroeger/vim-bookmarks'
 Plug 'lepture/vim-jinja'
+" vim-specific plugins
+if !has('nvim')
+    Plug 'andrep/vimacs'
+endif
+
 " Plug 'godlygeek/tabular'
 " Plug 'preservim/vim-markdown'
 " Plug 'pyarmak/vim-pandoc-live-preview'
