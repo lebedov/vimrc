@@ -30,13 +30,19 @@ Plug 'vim-syntastic/syntastic'
 Plug 'luochen1990/rainbow'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'jamessan/vim-gnupg'
-Plug 'airblade/vim-gitgutter'
+if !has('nvim')
+    Plug 'airblade/vim-gitgutter'
+endif
 Plug 'scrooloose/nerdcommenter'
 Plug 'scrooloose/nerdtree'
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'tpope/vim-fugitive'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
-Plug 'ryanoasis/vim-devicons'
+if has('nvim')
+    Plug 'nvim-tree/nvim-web-devicons'
+else
+    Plug 'ryanoasis/vim-devicons'
+endif
 Plug 'itchyny/calendar.vim'
 Plug 'vim-pandoc/vim-pandoc'
 Plug 'vim-pandoc/vim-pandoc-syntax'
@@ -44,7 +50,11 @@ Plug 'mileszs/ack.vim'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'christoomey/vim-titlecase'
-Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+if executable('node') && executable('yarn')
+    Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+else
+    Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install' }
+endif
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'jalvesaq/Nvim-R'
@@ -53,13 +63,19 @@ Plug 'inkarkat/vim-AdvancedSorters'
 Plug 'skywind3000/asyncrun.vim'
 Plug 'chrisbra/csv.vim'
 Plug 'lebedov/mdnav'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'SidOfc/mkdx'
 Plug 'sunaku/vim-dasht'
 Plug 'dkarter/bullets.vim'
 Plug 'prettier/vim-prettier'
 Plug 'MattesGroeger/vim-bookmarks'
 Plug 'lepture/vim-jinja'
+Plug 'github/copilot.vim'
+
+if has('nvim')
+    Plug 'CopilotC-Nvim/CopilotChat.nvim'
+endif
+
 " vim-specific plugins
 if !has('nvim')
     Plug 'andrep/vimacs'
@@ -86,11 +102,134 @@ endif
 " Plug 'xolox/vim-misc'
 " Plug 'xolox/vim-easytags'
 " Plug 'klen/python-mode'
+
+" nvim-specific plugins
+" 08/09/2024: for some reason, jsonfly doesn't work
+if has('nvim')
+    Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+    Plug 'nvim-lua/plenary.nvim'
+    Plug 'nvim-telescope/telescope.nvim', {'tag': '0.1.8'}
+    Plug 'nvim-telescope/telescope-file-browser.nvim'
+    Plug 'Myzel394/jsonfly.nvim'
+    Plug 'jakewvincent/mkdnflow.nvim'
+    Plug 'romgrk/todoist.nvim', { 'do': ':TodoistInstall' }
+    Plug 'lewis6991/gitsigns.nvim'
+    Plug 'folke/trouble.nvim'
+    Plug 'neovim/nvim-lspconfig'
+    Plug 'williamboman/mason.nvim'
+    Plug 'williamboman/mason-lspconfig.nvim'
+    Plug 'nvimtools/none-ls.nvim'
+    Plug 'jay-babu/mason-null-ls.nvim'
+    Plug 'MunifTanjim/nui.nvim'
+    Plug 'cseickel/diagnostic-window.nvim'
+    " for using slash commands and variables in codecompanion chat buffer
+    Plug 'hrsh7th/nvim-cmp'
+    " improve vim.ui.select
+    Plug 'stevearc/dressing.nvim'
+    Plug 'olimorris/codecompanion.nvim'
+    Plug 'VPavliashvili/json-nvim', {'for': 'json'}
+    Plug 'mcauley-penney/visual-whitespace.nvim'
+endif
 call plug#end()
 
 """ End lines required by vim-plug
 
-set rtp+=~/.vim/plugged/vimacs/plugin
+if !has('nvim')
+    let &rtp .= plugged_dir . '/vimacs/plugin'
+endif
+
+if has('nvim')
+lua <<EOF
+require("mason").setup()
+require("mason-lspconfig").setup()
+if vim.fn.executable('pylsp') == 1 then
+    require("lspconfig").pylsp.setup {
+        settings = {
+            pylsp = {
+                plugins = {
+                    pycodestyle = {enabled = false},
+                    pyflakes = {enabled = false},
+                    pylint = {enabled = false}
+                },
+                maxLineLength = 120
+            },
+        },
+    }
+end
+vim.api.nvim_set_keymap(
+    "n",
+    "gd",
+    "<cmd>lua vim.lsp.buf.definition()<cr>",
+    { noremap = True }
+)
+vim.api.nvim_set_keymap(
+    "n",
+    "gs",
+    "<cmd>lua vim.lsp.buf.signature_help()<cr>",
+    { noremap = True }
+)
+require("telescope").load_extension("jsonfly")
+require("telescope").setup {
+    extensions = {
+        jsonfly = {
+            mirror = true,
+            layout_strategy = "vertical",
+            layout_config = {
+                mirror = true,
+                preview_height = 0.65,
+                prompt_position = "top"
+            },
+            key_exact_length = true
+        }
+    }
+}
+require("telescope").load_extension("file_browser")
+vim.api.nvim_set_keymap(
+  "n",
+  "<leader>cs",
+  ":Trouble symbols toggle focus=false<cr>",
+  { noremap = true }
+)
+vim.api.nvim_set_keymap(
+  "n",
+  "<space>fb",
+  ":Telescope file_browser<CR>",
+  { noremap = true }
+)
+vim.api.nvim_set_keymap(
+  "n",
+  "<space>ht",
+  ":Telescope help_tags<CR>",
+  { noremap = true }
+)
+require('gitsigns').setup()
+require('codecompanion').setup({
+    adapters = {
+        ollama = function ()
+            return require('codecompanion.adapters').extend('ollama', {
+                schema = {
+                    model = {
+                        default = 'llama3.2:latest',
+                    }
+                },
+            })
+        end,
+    },
+    strategies = {
+        chat = {
+            adapter = 'ollama'
+        },
+        inline = {
+            adapter = 'ollama'
+        },
+        agent = {
+            adapter = 'ollama'
+        }
+    },
+})
+EOF
+endif
+
 filetype plugin indent on
 
 " Bind various keys:
@@ -113,13 +252,23 @@ set number
 " Automatically indent lines:
 set autoindent
 
+"set breakindent                     " keep indentation when lines break
+"set breakindentopt=shift:2          " but shift it by 2 spaces
+"set linebreak
+
+" Set up bullets handling:
+" let g:bullets_enabled_file_types = [
+"    \ 'markdown',
+"    \ 'text',
+"    \]
+
 " Setup line wrapping:
 set whichwrap=b,s,<,>,[,]
 set wrap
 set textwidth=80
 
 " Set formatting options:
-au FileType text,rst,md,tex set fo=aw
+au FileType text,rst,tex set fo=aw
 
 " Default file encoding:
 set encoding=utf-8
@@ -157,11 +306,13 @@ let g:pandoc#modules#disabled = ["folding"]
 " Don't de-indent labels:
 set cinoptions+=L0
 
-" Enable vimacs:
-let g:VM_Enabled=1
+if !has('nvim')
+    " Enable vimacs:
+    let g:VM_Enabled=1
 
-" Don't let vimacs automatically increase the command height:
-let g:VM_CmdHeightAdj=0
+    " Don't let vimacs automatically increase the command height:
+    let g:VM_CmdHeightAdj=0
+endif
 
 " Configure syntastic:
 " let g:syntastic_mode_map = {'mode': 'passive', 'active_filetypes': [], 'passive_filetypes': ['python']}
@@ -228,8 +379,11 @@ set suffixesadd+=.m
 
 " Use UTF-8:
 if has("multi_byte")
-    if &termencoding == ""
-        let &termencoding = &encoding
+    if !has("nvim")
+        " termencoding removed from nvim
+        if &termencoding == ""
+            let &termencoding = &encoding
+        endif
     endif
     set encoding=utf-8
     setglobal fileencoding=utf-8
@@ -303,7 +457,11 @@ else
     let g:livepreview_previewer = 'evince'
 endif
 
-let g:mkdp_browser = 'qutebrowser'
+if has('macunix')
+    let g:mkdp_browser = 'orion'
+else
+    let g:mkdp_browser = 'firefox'
+endif
 
 autocmd BufNewFile,BufRead *.pmd set filetype=pymdnoweb
 autocmd BufNewFile,BufRead *.rstw set filetype=pyrstnoweb
@@ -315,12 +473,13 @@ command! BackupPlugins !tar -C ~/.vim -zcvf ~/.vim/plugged.tar.gz plugged
 command! RestorePlugins !tar -C ~/.vim -zxf ~/.vim/plugged.tar.gz
 
 " Shortcut to jump to definition with Coc:
-nmap <silent> gd <Plug>(coc-definition)
+" nmap <silent> gd <Plug>(coc-definition)
 
 " Disable Coc completion suggestions for several file types:
-autocmd FileType markdown let b:coc_suggest_disable = 1
-autocmd FileType python let b:coc_suggest_disable = 1
+" autocmd FileType markdown let b:coc_suggest_disable = 1
+" autocmd FileType python let b:coc_suggest_disable = 1
 
+" Key for showing syntax items:
 nmap <leader>sp :call <SID>SynStack()<CR>
 function! <SID>SynStack()
   if !exists("*synstack")
@@ -341,3 +500,8 @@ nnoremap <silent> <Leader>K :call Dasht(dasht#cursor_search_terms())<Return>
 
 " search ALL the docsets
 nnoremap <silent> <Leader><Leader>K :call Dasht(dasht#cursor_search_terms(), '!')<Return>
+
+if has('nvim')
+    set laststatus=3
+endif
+
