@@ -203,32 +203,38 @@ vim.api.nvim_set_keymap(
   { noremap = true }
 )
 require('gitsigns').setup()
-require('codecompanion').setup({
-    adapters = {
-        ollama = function ()
-            return require('codecompanion.adapters').extend('ollama', {
-                schema = {
-                    model = {
-                        default = 'llama3.2:latest',
-                    }
-                },
-            })
-        end,
-    },
-    strategies = {
-        chat = {
-            adapter = 'ollama'
-        },
-        inline = {
-            adapter = 'ollama'
-        },
-        agent = {
-            adapter = 'ollama'
-        }
-    },
-})
+
+require('codecompanion').setup()
 EOF
 endif
+
+" Use this configuration to test out codecompanion with the ollama adapter:
+"if has('nvim')
+"require('codecompanion').setup({
+"    adapters = {
+"        ollama = function ()
+"            return require('codecompanion.adapters').extend('ollama', {
+"                schema = {
+"                    model = {
+"                        default = 'llama3.2:latest',
+"                    }
+"                },
+"            })
+"        end,
+"    },
+"    strategies = {
+"        chat = {
+"            adapter = 'ollama'
+"        },
+"        inline = {
+"            adapter = 'ollama'
+"        },
+"        agent = {
+"            adapter = 'ollama'
+"        }
+"    },
+"})
+"endif
 
 filetype plugin indent on
 
