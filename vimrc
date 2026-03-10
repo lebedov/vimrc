@@ -1,13 +1,18 @@
 " Install vim-plug if it isn't present:
 if has('nvim')
-    let data_dir = '~/.local/share/nvim/site'
+    let data_dir = expand('~/.local/share/nvim/site')
 else
-    let data_dir = '~/.vim'
+    let data_dir = expand('~/.vim')
 endif
 let autoload_dir = data_dir . '/autoload'
-if empty(glob(autoload_dir . '/plug.vim'))
-    silent execute '!curl -fLo '.autoload_dir.'/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-    autocmd VimEnter * PlugUpdate --sync | source $MYVIMRC
+let plug_dir = autoload_dir . '/plug.vim'
+if empty(glob(plug_dir))
+    if executable('curl')
+        silent execute '!curl -fLo '.plug_dir.' --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+        let plug_bootstrap = 1
+    else
+        echoerr 'vim-plug bootstrap: curl not found'
+    endif
 endif
 
 " Initialize vim-plug:
@@ -122,24 +127,77 @@ if has('nvim')
     Plug 'jay-babu/mason-null-ls.nvim'
     Plug 'MunifTanjim/nui.nvim'
     Plug 'cseickel/diagnostic-window.nvim'
+    
     " for using slash commands and variables in codecompanion chat buffer
     Plug 'hrsh7th/nvim-cmp'
+    Plug 'hrsh7th/cmp-vsnip'
+    Plug 'hrsh7th/vim-vsnip'
+    "Plug 'zbirenbaum/copilot.lua'
+    "Plug 'zbirenbaum/copilot-cmp'
+    Plug 'CopilotC-Nvim/CopilotChat.nvim'
+
     " improve vim.ui.select
     Plug 'stevearc/dressing.nvim'
     Plug 'olimorris/codecompanion.nvim'
     Plug 'VPavliashvili/json-nvim', {'for': 'json'}
     Plug 'mcauley-penney/visual-whitespace.nvim'
+    Plug 'folke/which-key.nvim'
 endif
 call plug#end()
 
 """ End lines required by vim-plug
 
+augroup PlugAutoUpdate
+    autocmd!
+    " Run PlugUpdate on first VimEnter after installing vim-plug:
+    if exists('plug_bootstrap')
+        autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+
+    " Otherwise, run PlugUpdate if any declared plugins' directories are missing:
+    else
+        autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)')) |
+            \ PlugInstall --sync | source $MYVIMRC |
+            \ endif
+    endif
+augroup END
+
+" Automatically install missing plugins on startup:
+autocmd VimEnter *
+    \ if len(filter(values(g:plugs), '!isdirectory(v:val.dir)')) |
+    \   PlugInstall --sync | source $MYVIMRC |
+    \ endif 
+
 if !has('nvim')
     let &rtp .= plugged_dir . '/vimacs/plugin'
 endif
 
+" Configuration for copilot.lua + copilot_cmp:
+"if has('nvim')
+"lua <<EOF
+"require("copilot").setup({
+"    suggestion = { enabled = false },
+"    panel = { enabled = false }
+"})
+"require("copilot_cmp").setup()
+"cmp = require("cmp")
+"cmp.setup({
+"    snippet = {
+"        expand = function(args)
+"            vim.fn["vsnip#anonymous"](args.body)
+"        end,
+"    },
+"    sources = {
+"        { name = "copilot" },
+"        { name = "nvim_lsp" },
+"        { name = "vsnip" },
+"    },
+"})
+"EOF
+"endif
+
 if has('nvim')
 lua <<EOF
+require("which-key").setup()
 require("mason").setup()
 require("mason-lspconfig").setup()
 if vim.fn.executable('pylsp') == 1 then
