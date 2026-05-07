@@ -15,6 +15,27 @@ if empty(glob(plug_dir))
     endif
 endif
 
+augroup PlugAutoUpdate
+    autocmd!
+    " Run PlugUpdate on first VimEnter after installing vim-plug:
+    if exists('plug_bootstrap')
+        autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+
+    " Otherwise, run PlugUpdate if any declared plugins' directories are missing:
+    else
+        autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)')) |
+            \ PlugInstall --sync | source $MYVIMRC |
+            \ endif
+    endif
+augroup END
+
+" Automatically install missing plugins on startup:
+autocmd VimEnter *
+    \ if len(filter(values(g:plugs), '!isdirectory(v:val.dir)')) |
+    \   PlugInstall --sync | source $MYVIMRC |
+    \ endif 
+
+
 " Initialize vim-plug:
 let plugged_dir = data_dir . '/plugged'
 call plug#begin(plugged_dir)
@@ -128,7 +149,7 @@ if has('nvim')
     Plug 'MunifTanjim/nui.nvim'
     Plug 'cseickel/diagnostic-window.nvim'
     
-    " for using slash commands and variables in codecompanion chat buffer
+    " for using slash commands and variables in CodeCompanion chat buffer
     Plug 'hrsh7th/nvim-cmp'
     Plug 'hrsh7th/cmp-vsnip'
     Plug 'hrsh7th/vim-vsnip'
@@ -138,34 +159,20 @@ if has('nvim')
 
     " improve vim.ui.select
     Plug 'stevearc/dressing.nvim'
+
+    " CodeCompanion and related plugins:
     Plug 'olimorris/codecompanion.nvim'
+    Plug 'cairijun/codecompanion-agentskills.nvim'
+
     Plug 'VPavliashvili/json-nvim', {'for': 'json'}
     Plug 'mcauley-penney/visual-whitespace.nvim'
     Plug 'folke/which-key.nvim'
+
+    Plug 'Vigemus/iron.nvim'
 endif
 call plug#end()
 
 """ End lines required by vim-plug
-
-augroup PlugAutoUpdate
-    autocmd!
-    " Run PlugUpdate on first VimEnter after installing vim-plug:
-    if exists('plug_bootstrap')
-        autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-
-    " Otherwise, run PlugUpdate if any declared plugins' directories are missing:
-    else
-        autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)')) |
-            \ PlugInstall --sync | source $MYVIMRC |
-            \ endif
-    endif
-augroup END
-
-" Automatically install missing plugins on startup:
-autocmd VimEnter *
-    \ if len(filter(values(g:plugs), '!isdirectory(v:val.dir)')) |
-    \   PlugInstall --sync | source $MYVIMRC |
-    \ endif 
 
 if !has('nvim')
     let &rtp .= plugged_dir . '/vimacs/plugin'
@@ -198,6 +205,13 @@ endif
 if has('nvim')
 lua <<EOF
 require("which-key").setup()
+vim.api.nvim_set_keymap(
+  "n",
+  "<leader>?",
+  ":Buffer Local Keymaps (which-key)<cr>",
+  { noremap = true }
+)
+
 require("mason").setup()
 require("mason-lspconfig").setup()
 if vim.fn.executable('pylsp') == 1 then
@@ -262,7 +276,78 @@ vim.api.nvim_set_keymap(
 )
 require('gitsigns').setup()
 
-require('codecompanion').setup()
+local stat = vim.loop.fs_stat(vim.fn.expand("~/.agents/skills/caveman"))
+if not stat then
+    vim.fn.jobstart(
+        {"npx", "--yes", "skills", "add", "JuliusBrussee/caveman", "-a", "github-copilot", "-g", "-y"},
+        {
+        stdout_buffered = true,
+        on_stdout = function(_, data)
+            if data then
+                print(table.concat(data, "\n"))
+            end
+        end,
+        on_stderr = function(_, data)
+            if data then
+                print(table.concat(data, "\n"))
+            end
+        end,
+        }
+    )
+end
+
+require('codecompanion').setup({
+    opts = {
+        log_level = "info",
+    },
+    display = {
+        window = {
+            chat = {
+                layout = "horizontal",
+                height = 0.4
+            },
+            opts = {
+                breakindent = true,
+                linebreak = true,
+                wrap = true,
+            },
+        },
+    },
+})
+-- require('codecompanion').setup({
+--    extensions = {
+--       agentskills = {
+--           opts = {
+--               paths = {
+--                   {"~/.agents/skills", recursive=true}
+--               }
+--           },
+--       },
+--   }, 
+-- })
+
+local view = require('iron.view')
+require('iron.core').setup {
+    config = {
+        sh = {
+            command = {"zsh"}
+        },
+        repl_definition = {
+            python = {
+                command = {"ipython", "--no-autoindent", "--simple-prompt"}
+            },
+        },
+        repl_open_cmd = view.bottom(40),
+        keymaps = {
+            toggle_repl = "<space>rr",
+            restart_repl = "<space>rs",
+            send_motion = "<space>sc",
+            visual_send = "<space>sc",
+            send_file = "<space>sf",
+            send_line = "<space>sl",
+        }
+    },
+}
 EOF
 endif
 
