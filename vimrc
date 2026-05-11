@@ -29,13 +29,6 @@ augroup PlugAutoUpdate
     endif
 augroup END
 
-" Automatically install missing plugins on startup:
-autocmd VimEnter *
-    \ if len(filter(values(g:plugs), '!isdirectory(v:val.dir)')) |
-    \   PlugInstall --sync | source $MYVIMRC |
-    \ endif 
-
-
 " Initialize vim-plug:
 let plugged_dir = data_dir . '/plugged'
 call plug#begin(plugged_dir)
