@@ -157,6 +157,7 @@ if has('nvim')
     Plug 'olimorris/codecompanion.nvim'
     Plug 'cairijun/codecompanion-agentskills.nvim'
 
+    Plug 'carlos-algms/agentic.nvim'
     Plug 'VPavliashvili/json-nvim', {'for': 'json'}
     Plug 'mcauley-penney/visual-whitespace.nvim'
     Plug 'folke/which-key.nvim'
@@ -197,6 +198,11 @@ endif
 
 if has('nvim')
 lua <<EOF
+require("agentic").setup({
+   debug = true,
+   provider = "copilot-acp"
+})
+
 require("which-key").setup()
 vim.api.nvim_set_keymap(
   "n",
@@ -342,6 +348,8 @@ require('iron.core').setup {
     },
 }
 EOF
+command! ToggleAgenticChat lua require('agentic').toggle()
+command! AgenticSwitchProvider lua require('agentic').switch_provider()
 endif
 
 " Use this configuration to test out codecompanion with the ollama adapter:
