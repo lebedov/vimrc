@@ -153,10 +153,15 @@ if has('nvim')
     " improve vim.ui.select
     Plug 'stevearc/dressing.nvim'
 
+    " Needed for CodeCompanion:
+    Plug 'kkharji/sqlite.lua'
+
     " CodeCompanion and related plugins:
     Plug 'olimorris/codecompanion.nvim'
     Plug 'cairijun/codecompanion-agentskills.nvim'
+    Plug 'lalitmee/codecompanion-spinners.nvim'
 
+    Plug 'seagoj/kiro.nvim'
     Plug 'carlos-algms/agentic.nvim'
     Plug 'VPavliashvili/json-nvim', {'for': 'json'}
     Plug 'mcauley-penney/visual-whitespace.nvim'
@@ -295,21 +300,14 @@ if not stat then
     )
 end
 
+require("CopilotChat").setup({
+    model = "gpt-5.2"
+})
+
 require('codecompanion').setup({
-    opts = {
-        log_level = "info",
-    },
-    display = {
-        window = {
-            chat = {
-                layout = "horizontal",
-                height = 0.4
-            },
-            opts = {
-                breakindent = true,
-                linebreak = true,
-                wrap = true,
-            },
+    extensions = {
+        spinner = {
+            style = "cursor-relative"
         },
     },
 })
@@ -324,6 +322,12 @@ require('codecompanion').setup({
 --       },
 --   }, 
 -- })
+require('kiro').setup({
+  register_default_commands = true,  -- Enable default commands (default: true)
+  split = 'vsplit',                  -- Split direction: 'split', 'vsplit', or 'float' (default: 'vsplit')
+  commands = {},                     -- Custom commands (default: {})
+  enable_lsp = true,                 -- Enable LSP integration (default: true)
+})
 
 local view = require('iron.view')
 require('iron.core').setup {
