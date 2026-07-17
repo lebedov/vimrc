@@ -309,6 +309,37 @@ require('codecompanion').setup({
         spinner = {
             style = "cursor-relative"
         },
+        agentskills = {
+            opts = {
+               paths = {
+                   {"~/.agents/skills", recursive=true}
+               }
+           },
+        },
+    },
+    interactions = {
+        cli = {
+            agent = 'copilot_cli',
+            agents = {
+                copilot_cli = {
+                    cmd = 'copilot',
+                    args = {},
+                    description = 'GitHub Copilot CLI',
+                    provider = 'terminal',
+                },
+            },
+        },
+    },
+    adapters = {
+        copilot_acp = function()
+            return require('codecompanion.adapters').extend('copilot-acp', {
+                schema = {
+                    model = {
+                        default = 'gpt-5.2',
+                    }
+                },
+            })
+        end,
     },
 })
 -- require('codecompanion').setup({
