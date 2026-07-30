@@ -56,6 +56,7 @@ Plug 'scrooloose/nerdcommenter'
 Plug 'scrooloose/nerdtree'
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'tpope/vim-fugitive'
+Plug 'rbong/vim-flog'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 if has('nvim')
     Plug 'nvim-tree/nvim-web-devicons'
@@ -524,6 +525,7 @@ let g:rainbow_conf = {
 
 " Configure indent guides:
 let g:indent_guides_guide_size = 1
+let g:indent_guides_enable_on_vim_startup = 1
 
 " Use horizontally split window for taglist:
 let Tlist_Use_Horiz_Window = 1
