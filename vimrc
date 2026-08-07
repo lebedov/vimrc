@@ -8,7 +8,7 @@ let autoload_dir = data_dir . '/autoload'
 let plug_dir = autoload_dir . '/plug.vim'
 if empty(glob(plug_dir))
     if executable('curl')
-        silent execute '!curl -fLo '.plug_dir.' --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+        silent execute '!curl -fLo '.plug_dir.' --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim' | source $MYVIMRC
         let plug_bootstrap = 1
     else
         echoerr 'vim-plug bootstrap: curl not found'
@@ -306,6 +306,20 @@ require("CopilotChat").setup({
 })
 
 require('codecompanion').setup({
+    display = {
+        chat = {
+            window = {
+                layout = 'bottom',
+                width = 1.0,
+                height = 0.4,
+            },
+            opts = {
+                number = true,
+                wrap = true,
+                breakindent = true,
+            }
+        }
+    },
     extensions = {
         spinner = {
             style = "cursor-relative"
@@ -343,17 +357,6 @@ require('codecompanion').setup({
         end,
     },
 })
--- require('codecompanion').setup({
---    extensions = {
---       agentskills = {
---           opts = {
---               paths = {
---                   {"~/.agents/skills", recursive=true}
---               }
---           },
---       },
---   }, 
--- })
 require('kiro').setup({
   register_default_commands = true,  -- Enable default commands (default: true)
   split = 'vsplit',                  -- Split direction: 'split', 'vsplit', or 'float' (default: 'vsplit')
