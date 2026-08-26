@@ -8,8 +8,9 @@ let autoload_dir = data_dir . '/autoload'
 let plug_dir = autoload_dir . '/plug.vim'
 if empty(glob(plug_dir))
     if executable('curl')
-        silent execute '!curl -fLo '.plug_dir.' --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim' | source $MYVIMRC
-        let plug_bootstrap = 1
+        silent execute '!curl -fLo '.plug_dir.' --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+        execute 'source ' . plug_dir
+        let g:plug_bootstrap = 1
     else
         echoerr 'vim-plug bootstrap: curl not found'
     endif
@@ -17,16 +18,9 @@ endif
 
 augroup PlugAutoUpdate
     autocmd!
-    " Run PlugUpdate on first VimEnter after installing vim-plug:
-    if exists('plug_bootstrap')
-        autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-
-    " Otherwise, run PlugUpdate if any declared plugins' directories are missing:
-    else
-        autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)')) |
-            \ PlugInstall --sync | source $MYVIMRC |
-            \ endif
-    endif
+    autocmd VimEnter * if exists('g:plug_boostrap') || len(filter(values(g:plugs), '!isdirectory(v:val.dir)')) 
+                \ | PlugInstall --sync | source $MYVIMRC |
+                \ endif
 augroup END
 
 " Initialize vim-plug:
